@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بقالتي الفلانيه</title>
+<style>
+body{font-family:Arial;background:#f3f5f7;margin:0;color:#222}
+header{background:#16834b;color:white;padding:22px;text-align:center}
+main{padding:16px;max-width:650px;margin:auto}
+.card{background:white;padding:16px;border-radius:12px;margin-bottom:15px}
+input,select,button{width:100%;padding:12px;margin:6px 0;box-sizing:border-box;border-radius:8px;border:1px solid #ddd;font-size:16px}
+button{background:#16834b;color:white;border:0;font-weight:bold}
+.product{border-bottom:1px solid #ddd;padding:12px}
+.stats{display:flex;gap:10px}
+.stats div{background:white;padding:15px;border-radius:10px;flex:1;text-align:center}
+</style>
+</head>
+<body>
+<header>
+<h1>🛒 بقالتي الفلانيه</h1>
+<p>إدارة البقالة والمبيعات والمخزون</p>
+</header>
+<main>
+<div class="stats">
+<div>المنتجات<br><b id="count">0</b></div>
+<div>المبيعات<br><b id="sales">0</b></div>
+</div>
+<div class="card">
+<h3>إضافة منتج جديد</h3>
+<input id="name" placeholder="اسم المنتج">
+<input id="price" type="number" placeholder="سعر البيع">
+<input id="qty" type="number" placeholder="الكمية">
+<button onclick="addProduct()">إضافة المنتج</button>
+</div>
+<div class="card">
+<h3>المخزون</h3>
+<div id="products"></div>
+</div>
+<div class="card">
+<h3>تسجيل عملية بيع</h3>
+<select id="item"></select>
+<input id="amount" type="number" placeholder="الكمية المباعة">
+<select id="payment">
+<option value="نقدي">نقدي</option>
+<option value="إلكتروني">إلكتروني</option>
+</select>
+<button onclick="sell()">تسجيل البيع</button>
+</div>
+<div class="card">
+<h3>آخر المبيعات</h3>
+<div id="history"></div>
+</div>
+</main>
+<script>
+let products=JSON.parse(localStorage.getItem('products')||'[]');
+let sales=JSON.parse(localStorage.getItem('sales')||'[]');
+function save(){
+localStorage.setItem('products',JSON.stringify(products));
+localStorage.setItem('sales',JSON.stringify(sales));
+render();
+}
+function addProduct(){
+let name=document.getElementById('name').value.trim();
+let price=Number(document.getElementById('price').value);
+let qty=Number(document.getElementById('qty').value);
+if(!name||price<=0||qty<=0){alert('أدخل بيانات صحيحة');return}
+products.push({name,price,qty});
+document.getElementById('name').value='';
+document.getElementById('price').value='';
+document.getElementById('qty').value='';
+save();
+}
+function sell(){
+let i=Number(document.getElementById('item').value);
+let amount=Number(document.getElementById('amount').value);
+if(!products[i]||amount<=0||amount>products[i].qty){
+alert('تحقق من المنتج والكمية المتوفرة');return;
+}
+products[i].qty-=amount;
+sales.unshift({
+name:products[i].name,
+amount,
+total:amount*products[i].price,
+payment:document.getElementById('payment').value
+});
+document.getElementById('amount').value='';
+save();
+}
+function render(){
+document.getElementById('count').textContent=products.length;
+document.getElementById('sales').textContent=sales.reduce((a,s)=>a+s.total,0);
+document.getElementById('products').innerHTML=products.map((p,i)=>
+`<div class="product">${p.name} - ${p.price} أوقية<br>المخزون: ${p.qty}
+<button onclick="removeProduct(${i})">حذف</button></div>`).join('');
+document.getElementById('item').innerHTML=products.map((p,i)=>
+`<option value="${i}">${p.name} (المتوفر ${p.qty})</option>`).join('');
+document.getElementById('history').innerHTML=sales.map(s=>
+`<div class="product">${s.name} × ${s.amount} = ${s.total} أوقية (${s.payment})</div>`).join('');
+}
+function removeProduct(i){
+if(confirm('هل تريد حذف المنتج؟')){products.splice(i,1);save();}
+}
+render();
+</script>
+</body>
+</html>
