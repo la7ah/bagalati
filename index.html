@@ -1,108 +1,256 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>بقالتي الفلانيه</title>
-<style>
-body{font-family:Arial;background:#f3f5f7;margin:0;color:#222}
-header{background:#16834b;color:white;padding:22px;text-align:center}
-main{padding:16px;max-width:650px;margin:auto}
-.card{background:white;padding:16px;border-radius:12px;margin-bottom:15px}
-input,select,button{width:100%;padding:12px;margin:6px 0;box-sizing:border-box;border-radius:8px;border:1px solid #ddd;font-size:16px}
-button{background:#16834b;color:white;border:0;font-weight:bold}
-.product{border-bottom:1px solid #ddd;padding:12px}
-.stats{display:flex;gap:10px}
-.stats div{background:white;padding:15px;border-radius:10px;flex:1;text-align:center}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16834b">
+  <title>بقالتي</title>
+  <style>
+    :root { --green:#16834b; --green-dark:#10683a; --bg:#eef2ef; --text:#1e2930; --muted:#6b7470; --border:#dde5df; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Tahoma, Arial, sans-serif; background:var(--bg); color:var(--text); }
+    header { background:linear-gradient(135deg,var(--green),#20a762); color:white; padding:24px 16px; }
+    .header-inner, main { max-width:1100px; margin:auto; }
+    header h1 { margin:0 0 6px; font-size:25px; }
+    header p { margin:0; opacity:.9; }
+    main { display:grid; grid-template-columns:1fr 1.45fr; gap:16px; padding:16px; }
+    .card { background:white; border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:0 4px 18px rgba(20,60,40,.05); }
+    .full { grid-column:1/-1; }
+    h2,h3 { margin-top:0; }
+    h3 { font-size:18px; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+    .stat { background:white; border:1px solid var(--border); border-radius:14px; padding:16px; }
+    .stat span { display:block; color:var(--muted); margin-bottom:7px; }
+    .stat strong { font-size:25px; color:var(--green-dark); }
+    label { display:block; font-size:14px; margin:10px 0 5px; color:#44514b; }
+    input, select { width:100%; min-height:44px; padding:10px 12px; border:1px solid #ccd7d0; border-radius:9px; background:white; font:inherit; }
+    input:focus, select:focus { outline:3px solid rgba(22,131,75,.12); border-color:var(--green); }
+    button { min-height:44px; width:100%; border:0; border-radius:9px; padding:10px 14px; background:var(--green); color:white; font:inherit; font-weight:bold; cursor:pointer; }
+    button:hover { background:var(--green-dark); }
+    button.secondary { background:#edf3ef; color:#2d4a3a; }
+    button.danger { width:auto; min-height:36px; background:#fff1ef; color:#b33a2d; }
+    .toolbar { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
+    .toolbar input { max-width:280px; }
+    .product { display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid #edf1ee; padding:12px 0; }
+    .product:last-child { border-bottom:0; }
+    .product-info strong { display:block; margin-bottom:5px; }
+    .muted { color:var(--muted); }
+    .stock { display:inline-block; margin-top:4px; padding:3px 8px; border-radius:999px; background:#edf7f1; color:var(--green-dark); font-size:13px; }
+    .stock.low { background:#fff4df; color:#945900; }
+    .sale { display:flex; justify-content:space-between; gap:12px; border-bottom:1px solid #edf1ee; padding:11px 0; }
+    .sale:last-child { border-bottom:0; }
+    .empty { color:var(--muted); text-align:center; padding:24px 8px; }
+    .actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media (max-width:780px) { main { grid-template-columns:1fr; } .full { grid-column:auto; } .stats { grid-template-columns:1fr 1fr 1fr; } }
+    @media (max-width:520px) { .stats { grid-template-columns:1fr; } .toolbar { align-items:stretch; flex-direction:column; } .toolbar input { max-width:none; } .actions { grid-template-columns:1fr; } }
+  </style>
 </head>
 <body>
-<header>
-<h1>🛒 بقالتي الفلانيه</h1>
-<p>إدارة البقالة والمبيعات والمخزون</p>
-</header>
-<main>
-<div class="stats">
-<div>المنتجات<br><b id="count">0</b></div>
-<div>المبيعات<br><b id="sales">0</b></div>
-</div>
-<div class="card">
-<h3>إضافة منتج جديد</h3>
-<input id="name" placeholder="اسم المنتج">
-<input id="price" type="number" placeholder="سعر البيع">
-<input id="qty" type="number" placeholder="الكمية">
-<button onclick="addProduct()">إضافة المنتج</button>
-</div>
-<div class="card">
-<h3>المخزون</h3>
-<div id="products"></div>
-</div>
-<div class="card">
-<h3>تسجيل عملية بيع</h3>
-<select id="item"></select>
-<input id="amount" type="number" placeholder="الكمية المباعة">
-<select id="payment">
-<option value="نقدي">نقدي</option>
-<option value="إلكتروني">إلكتروني</option>
-</select>
-<button onclick="sell()">تسجيل البيع</button>
-</div>
-<div class="card">
-<h3>آخر المبيعات</h3>
-<div id="history"></div>
-</div>
-</main>
-<script>
-let products=JSON.parse(localStorage.getItem('products')||'[]');
-let sales=JSON.parse(localStorage.getItem('sales')||'[]');
-function save(){
-localStorage.setItem('products',JSON.stringify(products));
-localStorage.setItem('sales',JSON.stringify(sales));
-render();
-}
-function addProduct(){
-let name=document.getElementById('name').value.trim();
-let price=Number(document.getElementById('price').value);
-let qty=Number(document.getElementById('qty').value);
-if(!name||price<=0||qty<=0){alert('أدخل بيانات صحيحة');return}
-products.push({name,price,qty});
-document.getElementById('name').value='';
-document.getElementById('price').value='';
-document.getElementById('qty').value='';
-save();
-}
-function sell(){
-let i=Number(document.getElementById('item').value);
-let amount=Number(document.getElementById('amount').value);
-if(!products[i]||amount<=0||amount>products[i].qty){
-alert('تحقق من المنتج والكمية المتوفرة');return;
-}
-products[i].qty-=amount;
-sales.unshift({
-name:products[i].name,
-amount,
-total:amount*products[i].price,
-payment:document.getElementById('payment').value
-});
-document.getElementById('amount').value='';
-save();
-}
-function render(){
-document.getElementById('count').textContent=products.length;
-document.getElementById('sales').textContent=sales.reduce((a,s)=>a+s.total,0);
-document.getElementById('products').innerHTML=products.map((p,i)=>
-`<div class="product">${p.name} - ${p.price} أوقية<br>المخزون: ${p.qty}
-<button onclick="removeProduct(${i})">حذف</button></div>`).join('');
-document.getElementById('item').innerHTML=products.map((p,i)=>
-`<option value="${i}">${p.name} (المتوفر ${p.qty})</option>`).join('');
-document.getElementById('history').innerHTML=sales.map(s=>
-`<div class="product">${s.name} × ${s.amount} = ${s.total} أوقية (${s.payment})</div>`).join('');
-}
-function removeProduct(i){
-if(confirm('هل تريد حذف المنتج؟')){products.splice(i,1);save();}
-}
-render();
-</script>
+  <header>
+    <div class="header-inner">
+      <h1>🛒 بقالتي الفلانيه</h1>
+      <p>إدارة البقالة والمبيعات والمخزون</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="full">
+      <div class="stats">
+        <div class="stat"><span>عدد المنتجات</span><strong id="count">0</strong></div>
+        <div class="stat"><span>إجمالي المبيعات</span><strong><span id="sales" style="display:inline;font-size:inherit">0</span> أوقية</strong></div>
+        <div class="stat"><span>العمليات المسجلة</span><strong id="salesCount">0</strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>إضافة منتج جديد</h3>
+      <form id="productForm">
+        <label for="name">اسم المنتج</label>
+        <input id="name" placeholder="مثال: رز" autocomplete="off" required>
+        <label for="price">سعر البيع</label>
+        <input id="price" type="number" min="0.01" step="0.01" placeholder="بالأوقية" required>
+        <label for="qty">الكمية المتوفرة</label>
+        <input id="qty" type="number" min="1" step="1" placeholder="عدد القطع أو الوحدات" required>
+        <div style="margin-top:12px"><button type="submit">إضافة المنتج</button></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h3>تسجيل عملية بيع</h3>
+      <form id="saleForm">
+        <label for="item">المنتج</label>
+        <select id="item" required></select>
+        <label for="amount">الكمية المباعة</label>
+        <input id="amount" type="number" min="1" step="1" required>
+        <label for="payment">طريقة الدفع</label>
+        <select id="payment">
+          <option value="نقدي">نقدي</option>
+          <option value="إلكتروني">إلكتروني</option>
+          <option value="آجل">آجل</option>
+        </select>
+        <div style="margin-top:12px"><button type="submit">تسجيل البيع</button></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h3>المخزون</h3>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="البحث عن منتج...">
+      </div>
+      <div id="products"></div>
+    </section>
+
+    <section class="card">
+      <h3>آخر المبيعات</h3>
+      <div id="history"></div>
+      <div id="historyActions" class="actions" style="display:none;margin-top:12px">
+        <button id="exportSales" class="secondary" type="button">تصدير المبيعات CSV</button>
+        <button id="clearSales" class="secondary" type="button">مسح سجل المبيعات</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_PRODUCTS = 'bagalati_products';
+    const STORAGE_SALES = 'bagalati_sales';
+
+    function read(key, fallback) {
+      try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+      catch { return fallback; }
+    }
+
+    let products = read(STORAGE_PRODUCTS, []);
+    let sales = read(STORAGE_SALES, []);
+
+    const productForm = document.getElementById('productForm');
+    const saleForm = document.getElementById('saleForm');
+    const productsElement = document.getElementById('products');
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat('ar-MR', { maximumFractionDigits: 2 }).format(value);
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products));
+      localStorage.setItem(STORAGE_SALES, JSON.stringify(sales));
+      render();
+    }
+
+    productForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const price = Number(document.getElementById('price').value);
+      const qty = Number(document.getElementById('qty').value);
+
+      if (!name || !Number.isFinite(price) || price <= 0 || !Number.isInteger(qty) || qty <= 0) {
+        alert('يرجى إدخال بيانات منتج صحيحة');
+        return;
+      }
+
+      products.unshift({ id: Date.now(), name, price, qty });
+      productForm.reset();
+      save();
+    });
+
+    saleForm.addEventListener('submit', (event) => {
+      event.preventEvent && event.preventEvent();
+      event.preventDefault();
+      const index = Number(document.getElementById('item').value);
+      const amount = Number(document.getElementById('amount').value);
+
+      if (!products[index] || !Number.isInteger(amount) || amount <= 0) {
+        alert('يرجى التحقق من المنتج والكمية');
+        return;
+      }
+      if (amount > products[index].qty) {
+        alert('الكمية المطلوبة أكبر من المخزون المتوفر');
+        return;
+      }
+
+      const product = products[index];
+      product.qty -= amount;
+      sales.unshift({
+        id: Date.now(),
+        name: product.name,
+        amount,
+        total: amount * product.price,
+        payment: document.getElementById('payment').value,
+        date: new Date().toLocaleString('ar-MR')
+      });
+      document.getElementById('amount').value = '';
+      save();
+    });
+
+    function removeProduct(index) {
+      if (confirm(`هل تريد حذف منتج «${products[index].name}»؟`)) {
+        products.splice(index, 1);
+        save();
+      }
+    }
+
+    function escapeHtml(value) {
+      const div = document.createElement('div');
+      div.textContent = String(value);
+      return div.innerHTML;
+    }
+
+    function render() {
+      const totalSales = sales.reduce((sum, sale) => sum + Number(sale.total || 0), 0);
+      document.getElementById('count').textContent = formatNumber(products.length);
+      document.getElementById('sales').textContent = formatNumber(totalSales);
+      document.getElementById('salesCount').textContent = formatNumber(sales.length);
+
+      const query = document.getElementById('search').value.trim().toLowerCase();
+      const filtered = products.map((product, index) => ({ product, index }))
+        .filter(({ product }) => product.name.toLowerCase().includes(query));
+
+      productsElement.innerHTML = filtered.length ? filtered.map(({ product, index }) => `
+        <div class="product">
+          <div class="product-info">
+            <strong>${escapeHtml(product.name)}</strong>
+            <span class="muted">السعر: ${formatNumber(product.price)} أوقية</span>
+            <br><span class="stock ${product.qty <= 5 ? 'low' : ''}">المخزون: ${formatNumber(product.qty)}</span>
+          </div>
+          <button class="danger" type="button" onclick="removeProduct(${index})">حذف</button>
+        </div>`).join('') : '<div class="empty">لا توجد منتجات مطابقة</div>';
+
+      document.getElementById('item').innerHTML = products.length
+        ? products.map((product, index) => `<option value="${index}">${escapeHtml(product.name)} — متوفر ${formatNumber(product.qty)}</option>`).join('')
+        : '<option value="">لا توجد منتجات</option>';
+
+      document.getElementById('history').innerHTML = sales.length
+        ? sales.map(sale => `
+          <div class="sale">
+            <div><strong>${escapeHtml(sale.name)} × ${formatNumber(sale.amount)}</strong><br><span class="muted">${escapeHtml(sale.date || '')} — ${escapeHtml(sale.payment)}</span></div>
+            <strong>${formatNumber(sale.total)} أوقية</strong>
+          </div>`).join('')
+        : '<div class="empty">لا توجد مبيعات مسجلة بعد</div>';
+
+      document.getElementById('historyActions').style.display = sales.length ? 'grid' : 'none';
+    }
+
+    document.getElementById('search').addEventListener('input', render);
+
+    document.getElementById('clearSales').addEventListener('click', () => {
+      if (confirm('هل تريد مسح سجل المبيعات؟ لن يؤثر ذلك في المخزون.')) {
+        sales = [];
+        save();
+      }
+    });
+
+    document.getElementById('exportSales').addEventListener('click', () => {
+      const rows = [['المنتج','الكمية','الإجمالي','الدفع','التاريخ']];
+      sales.forEach(sale => rows.push([sale.name, sale.amount, sale.total, sale.payment, sale.date || '']));
+      const csv = '\ufeff' + rows.map(row => row.map(value => `"${String(value).replaceAll('"','""')}"`).join(',')).join('\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'مبيعات-بقالتي.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    render();
+  </script>
 </body>
 </html>
